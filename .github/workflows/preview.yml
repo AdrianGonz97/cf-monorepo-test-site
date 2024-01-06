@@ -1,6 +1,13 @@
 name: Deploy Preview Site
 on:
   pull_request:
+    paths:
+      - "sites/www/**"
+
+# cancel in-progress runs on new commits to same PR (github.event.number)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.sha }}
+  cancel-in-progress: true
 
 jobs:
   publish:

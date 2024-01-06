@@ -3,6 +3,10 @@ on:
   push:
     branches:
       - master
+    paths:
+      - "sites/www/**"
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   publish:
