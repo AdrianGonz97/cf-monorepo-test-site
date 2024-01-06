@@ -1,0 +1,35 @@
+name: Mock deployment
+
+on:
+  pull_request:
+    types:
+      - opened
+      - labeled
+      - synchronize
+
+jobs:
+  mock-deployment:
+    name: mock
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.ref,
+              auto_merge: false,
+              required_contexts: [],
+              description: "Mock deployment",
+            })
+
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deployment.data.id,
+              production_environment: false,
+              description: "Mock deployment",
+              state: "success",
+            })
