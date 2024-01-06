@@ -93,8 +93,8 @@ jobs:
             | Environment | ${{ steps.cloudflare-pages-deploy.outputs.environment }} |
 
   cleanup:
+    if: true
     needs: [publish]
-    if: ${{ true }}
     runs-on: ubuntu-latest
     steps:
       - name: Remove label
