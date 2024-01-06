@@ -78,7 +78,7 @@ jobs:
           # Optional: Change the working directory
           workingDirectory: sites/www
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
-          # wranglerVersion: "3"
+          wranglerVersion: "3"
 
       - name: Create PR comment
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
