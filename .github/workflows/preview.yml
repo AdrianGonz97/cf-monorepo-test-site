@@ -1,6 +1,6 @@
 name: Deploy Preview Site
 on:
-  pull_request:
+  pull_request_target:
     paths:
       - "sites/www/**"
 
