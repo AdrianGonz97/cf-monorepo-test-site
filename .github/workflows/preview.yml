@@ -9,6 +9,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.sha }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  # deployments: write
+  # pull-requests: read
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -53,7 +58,7 @@ jobs:
           projectName: cf-monorepo-test-site
           directory: ./.svelte-kit/cloudflare
           # Optional: Enable this if you want to have GitHub Deployments triggered
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          # gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           # Optional: Change the working directory
           workingDirectory: sites/www
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
