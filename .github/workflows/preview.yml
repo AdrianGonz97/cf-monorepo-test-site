@@ -83,18 +83,18 @@ jobs:
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
           # wranglerVersion: "3"
 
-      - name: Remove label
-        if: ${{ github.event_name == 'pull_request_target' && contains(github.event.label.name, 'request-cf-deploy') }}
-        uses: actions/github-script@v7
+      - name: Create commit comment
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: peter-evans/commit-comment@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.removeLabel({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: ['request-cf-deploy']
-            })
+          body: |
+            ### ⚡ Successfully Cloudflare Pages deployed!
+            | Name | Link |
+            | :--- | :--- |
+            | Latest commit | ${{ github.event.pull_request.head.sha || github.sha }} |
+            | Latest deploy log | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
+            | Deploy Preview Url | [${{ steps.cloudflare-pages-deploy.outputs.url }}](${{ steps.cloudflare-pages-deploy.outputs.url }}) |
+            | Environment | ${{ steps.cloudflare-pages-deploy.outputs.environment }} |
 
       - name: Create PR comment
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
@@ -108,3 +108,16 @@ jobs:
             | Latest deploy log | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
             | Deploy Preview Url | [${{ steps.cloudflare-pages-deploy.outputs.url }}](${{ steps.cloudflare-pages-deploy.outputs.url }}) |
             | Environment | ${{ steps.cloudflare-pages-deploy.outputs.environment }} |
+
+      - name: Remove label
+        if: ${{ github.event_name == 'pull_request_target' && contains(github.event.label.name, 'request-cf-deploy') }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.removeLabel({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: ['request-cf-deploy']
+            })
