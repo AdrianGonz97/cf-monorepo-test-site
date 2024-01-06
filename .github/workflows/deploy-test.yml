@@ -7,10 +7,7 @@ on:
       - labeled
       - synchronize
 
-permissions:
-  contents: write
-  pull-requests: write
-  deployments: write
+permissions: write-all
 
 jobs:
   mock-deployment:
