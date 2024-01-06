@@ -1,9 +1,5 @@
 name: Deploy Preview Site
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
   pull_request_target:
     types:
       - opened
@@ -28,12 +24,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     name: Publish Preview to Cloudflare Pages
-    if: ${{
-      github.event_name == 'pull_request_target' &&
-      github.event.action == 'labeled' &&
-      github.event.pull_request.head.repo.fork == true &&
-      contains(github.event.label.name, 'request-cf-deploy')
-      }}
+    if: ${{ (github.event_name == 'pull_request_target' && github.event.action == 'labeled' && github.event.pull_request.head.repo.fork == true && contains(github.event.label.name, 'request-cf-deploy')) }}
     steps:
       - uses: actions/checkout@v3
         with:
