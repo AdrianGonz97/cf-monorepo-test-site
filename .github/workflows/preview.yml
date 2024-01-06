@@ -12,13 +12,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.sha }}
   cancel-in-progress: true
 
-# permissions:
-#   # default contents: read & write (in forked repos, only read)
-#   contents: write
-#   # default deployments: read & write (in forked repos, only read)
-#   deployments: write
-#   # default pull-requests: read & write (in forked repos, only read)
-#   pull-requests: write
+permissions:
+  # default contents: read & write (in forked repos, only read)
+  contents: write
+  # default deployments: read & write (in forked repos, only read)
+  deployments: write
+  # default pull-requests: read & write (in forked repos, only read)
+  pull-requests: write
 
 jobs:
   publish:
@@ -87,6 +87,7 @@ jobs:
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
         uses: mshick/add-pr-comment@v2
         with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
           message: |
             ### ⚡ Successfully Cloudflare Pages deployed!
             | Name | Link |
