@@ -1,8 +1,9 @@
-name: Deploy Site
+name: Deploy Production Site
 on:
   push:
     branches:
       - master
+      - next
 
 jobs:
   publish:
@@ -40,7 +41,7 @@ jobs:
       - name: Build site
         run: pnpm -F www build
 
-      - name: Publish to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
