@@ -67,7 +67,6 @@ jobs:
       - name: Deploy to Cloudflare Pages
         id: cloudflare-pages-deploy
         uses: AdrianGonz97/cf-pages-action@fix/gh-deployment
-        continue-on-error: true
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
@@ -81,7 +80,7 @@ jobs:
           wranglerVersion: "3"
 
       - name: Create PR comment
-        if: ${{ steps.cloudflare-pages-deploy.outcome == 'success' && (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') }}
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
         uses: mshick/add-pr-comment@v2
         with:
           message: |
@@ -93,6 +92,11 @@ jobs:
             | Preview URL | [${{ steps.cloudflare-pages-deploy.outputs.url }}](${{ steps.cloudflare-pages-deploy.outputs.url }}) |
             | Environment | ${{ steps.cloudflare-pages-deploy.outputs.environment }} |
 
+  cleanup:
+    needs: [publish]
+    if: ${{ true }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Remove label
         if: ${{ github.event_name == 'pull_request_target' && contains(github.event.label.name, 'request-cf-deploy') }}
         uses: actions/github-script@v6
