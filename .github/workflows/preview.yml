@@ -19,14 +19,14 @@ permissions:
   deployments: write
   # default pull-requests: read & write (in forked repos, only read)
   pull-requests: write
-  issues: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      deployments: write
+    # permissions:
+    #   contents: read
+    #   deployments: write
+    #   pull-requests: write
     name: Publish Preview to Cloudflare Pages
     if: ${{
       github.event_name == 'push' ||
