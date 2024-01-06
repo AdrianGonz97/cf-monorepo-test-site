@@ -33,6 +33,9 @@ jobs:
       }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          fetch-depth: 0
       - uses: pnpm/action-setup@v2
         with:
           version: 8
@@ -73,3 +76,4 @@ jobs:
           workingDirectory: sites/www
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
           wranglerVersion: "3"
+          branch: preview
