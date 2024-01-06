@@ -1,6 +1,6 @@
 name: Deploy Preview Site
 on:
-  pull_request:
+  pull_request_target:
     paths:
       - "sites/www/**"
 
@@ -8,6 +8,11 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.sha }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
+  # deployments: write
+  # pull-requests: read
 
 jobs:
   publish:
@@ -53,7 +58,7 @@ jobs:
           projectName: cf-monorepo-test-site
           directory: ./.svelte-kit/cloudflare
           # Optional: Enable this if you want to have GitHub Deployments triggered
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          # gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           # Optional: Change the working directory
           workingDirectory: sites/www
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
