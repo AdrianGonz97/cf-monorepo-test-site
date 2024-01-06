@@ -21,7 +21,6 @@ jobs:
         id: deployment
         with:
           env: integration
-          ref: ${{ github.head_ref }}
           step: start
           token: ${{ secrets.GITHUB_TOKEN }}
           debug: true
