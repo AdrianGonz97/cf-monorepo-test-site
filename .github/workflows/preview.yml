@@ -64,6 +64,7 @@ jobs:
         run: pnpm -F www build
 
       - name: Deploy to Cloudflare Pages
+        id: cloudflare-pages-deploy
         uses: jaoafa/cloudflare-pages-action@main
         # uses: cloudflare/pages-action@v1
         with:
@@ -77,3 +78,28 @@ jobs:
           workingDirectory: sites/www
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
           # wranglerVersion: "3"
+      - name: Remove label
+        if: ${{ github.event_name == 'pull_request_target' && contains(github.event.label.name, '🚀request-deploy') }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.removeLabel({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: ['request-cf-deploy']
+            })
+
+      - name: Create PR comment
+        if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
+        uses: mshick/add-pr-comment@v2
+        with:
+          message: |
+            ### ⚡ Successfully Cloudflare Pages deployed!
+            | Name | Link |
+            | :--- | :--- |
+            | Latest commit | ${{ github.event.pull_request.head.sha || github.sha }} |
+            | Latest deploy log | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
+            | Deploy Preview Url | [${{ steps.cloudflare-pages-deploy.outputs.url }}](${{ steps.cloudflare-pages-deploy.outputs.url }}) |
+            | Environment | ${{ steps.cloudflare-pages-deploy.outputs.environment }} |
