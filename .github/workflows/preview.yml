@@ -93,7 +93,7 @@ jobs:
             | Environment | ${{ steps.cloudflare-pages-deploy.outputs.environment }} |
 
   cleanup:
-    if: true
+    if: always()
     needs: [publish]
     runs-on: ubuntu-latest
     steps:
