@@ -66,7 +66,7 @@ jobs:
 
       - name: Deploy to Cloudflare Pages
         id: cloudflare-pages-deploy
-        uses: AdrianGonz97/cf-pages-action@main
+        uses: AdrianGonz97/cf-pages-action@fix/gh-deployment
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
@@ -89,7 +89,7 @@ jobs:
             | :--- | :--- |
             | Latest commit | ${{ github.event.pull_request.head.sha || github.sha }} |
             | Latest deploy log | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
-            | Deploy Preview URL | [${{ steps.cloudflare-pages-deploy.outputs.url }}](${{ steps.cloudflare-pages-deploy.outputs.url }}) |
+            | Preview URL | [${{ steps.cloudflare-pages-deploy.outputs.url }}](${{ steps.cloudflare-pages-deploy.outputs.url }}) |
             | Environment | ${{ steps.cloudflare-pages-deploy.outputs.environment }} |
 
       - name: Remove label
