@@ -24,6 +24,7 @@ jobs:
           ref: ${{ github.head_ref }}
           step: start
           token: ${{ secrets.GITHUB_TOKEN }}
+          debug: true
 
       - name: start deployment
         uses: bobheadxi/deployments@v1
@@ -34,3 +35,4 @@ jobs:
           status: ${{ job.status }}
           env: ${{ steps.deployment.outputs.env }}
           deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+          debug: true
