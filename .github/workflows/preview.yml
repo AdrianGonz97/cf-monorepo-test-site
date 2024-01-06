@@ -64,7 +64,8 @@ jobs:
         run: pnpm -F www build
 
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
+        uses: jaoafa/cloudflare-pages-action@main
+        # uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
@@ -75,5 +76,4 @@ jobs:
           # Optional: Change the working directory
           workingDirectory: sites/www
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
-          wranglerVersion: "3"
-          branch: preview
+          # wranglerVersion: "3"
