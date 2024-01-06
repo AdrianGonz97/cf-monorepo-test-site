@@ -12,13 +12,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.sha }}
   cancel-in-progress: true
 
-permissions:
-  # default contents: read & write (in forked repos, only read)
-  contents: write
-  # default deployments: read & write (in forked repos, only read)
-  deployments: write
-  # default pull-requests: read & write (in forked repos, only read)
-  pull-requests: write
+# permissions:
+#   # default contents: read & write (in forked repos, only read)
+#   contents: write
+#   # default deployments: read & write (in forked repos, only read)
+#   deployments: write
+#   # default pull-requests: read & write (in forked repos, only read)
+#   pull-requests: write
 
 jobs:
   publish:
@@ -82,19 +82,6 @@ jobs:
           workingDirectory: sites/www
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
           # wranglerVersion: "3"
-
-      - name: Create commit comment
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        uses: peter-evans/commit-comment@v2
-        with:
-          body: |
-            ### ⚡ Successfully Cloudflare Pages deployed!
-            | Name | Link |
-            | :--- | :--- |
-            | Latest commit | ${{ github.event.pull_request.head.sha || github.sha }} |
-            | Latest deploy log | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
-            | Deploy Preview Url | [${{ steps.cloudflare-pages-deploy.outputs.url }}](${{ steps.cloudflare-pages-deploy.outputs.url }}) |
-            | Environment | ${{ steps.cloudflare-pages-deploy.outputs.environment }} |
 
       - name: Create PR comment
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
