@@ -24,7 +24,7 @@ jobs:
             const deployment = await github.rest.repos.createDeployment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: ${{ github.head_ref || github.ref }},
+              ref: context.ref,
               auto_merge: false,
               required_contexts: [],
               description: "Mock deployment",
