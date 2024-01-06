@@ -66,7 +66,7 @@ jobs:
 
       - name: Deploy to Cloudflare Pages
         id: cloudflare-pages-deploy
-        uses: jaoafa/cloudflare-pages-action@main
+        uses: AdrianGonz97/cf-pages-action@main
         # uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
