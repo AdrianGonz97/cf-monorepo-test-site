@@ -20,7 +20,7 @@ jobs:
         uses: bobheadxi/deployments@v1
         id: deployment
         with:
-          env: preview
+          env: integration
           ref: ${{ github.head_ref }}
           step: start
           token: ${{ secrets.GITHUB_TOKEN }}
