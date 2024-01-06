@@ -53,4 +53,3 @@ jobs:
           workingDirectory: sites/www
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
           wranglerVersion: "3"
-        #   branch: "master"
