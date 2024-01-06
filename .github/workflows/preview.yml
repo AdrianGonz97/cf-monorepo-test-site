@@ -89,9 +89,8 @@ jobs:
             | :--- | :--- |
             | Latest commit | ${{ github.event.pull_request.head.sha || github.sha }} |
             | Latest deploy log | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
-            | Preview URL | [${{ steps.cloudflare-pages-deploy.outputs.url }}](${{ steps.cloudflare-pages-deploy.outputs.url }}) |
+            | Preview URL | ${{ steps.cloudflare-pages-deploy.outputs.url }} |
             | Environment | ${{ steps.cloudflare-pages-deploy.outputs.environment }} |
-            | Alias? | ${{ steps.cloudflare-pages-deploy.outputs.alias }} |
 
   cleanup:
     name: Remove label
