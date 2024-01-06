@@ -1,7 +1,7 @@
 name: Mock deployment
 
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - labeled
@@ -14,27 +14,23 @@ permissions:
 
 jobs:
   mock-deployment:
-    name: mock
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v6
+      - name: start deployment
+        uses: bobheadxi/deployments@v1
+        id: deployment
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const deployment = await github.rest.repos.createDeployment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: '${{ github.head_ref || github.ref }}',
-              auto_merge: false,
-              required_contexts: [],
-              description: "Mock deployment",
-            })
+          env: release
+          ref: ${{ github.head_ref }}
+          step: start
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-            await github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              deployment_id: deployment.data.id,
-              production_environment: false,
-              description: "Mock deployment",
-              state: "success",
-            })
+      - name: start deployment
+        uses: bobheadxi/deployments@v1
+        if: always()
+        with:
+          step: finish
+          token: ${{ secrets.GITHUB_TOKEN }}
+          status: ${{ job.status }}
+          env: ${{ steps.deployment.outputs.env }}
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
