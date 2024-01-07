@@ -25,7 +25,7 @@ jobs:
   trusted-preview:
     if: ${{ github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' || github.event.pull_request.author_association == 'OWNER' }}
     runs-on: ubuntu-latest
-    name: Publish Preview to Cloudflare Pages
+    name: Deploy Preview to Cloudflare Pages (admin)
     steps:
       - uses: actions/checkout@v3
         with:
@@ -94,7 +94,7 @@ jobs:
     if: ${{ !(github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' || github.event.pull_request.author_association == 'OWNER') }}
     environment: Preview
     runs-on: ubuntu-latest
-    name: Publish Preview to Cloudflare Pages
+    name: Deploy Preview to Cloudflare Pages
     steps:
       - uses: actions/checkout@v3
         with:
