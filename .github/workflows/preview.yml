@@ -77,19 +77,6 @@ jobs:
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
           wranglerVersion: "3"
 
-      # - name: Create PR comment
-      #   if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
-      #   uses: mshick/add-pr-comment@v2
-      #   with:
-      #     message: |
-      #       ### ⚡ Successfully Cloudflare Pages deployed!
-      #       | Name | Link |
-      #       | :--- | :--- |
-      #       | Latest commit | ${{ github.event.pull_request.head.sha || github.sha }} |
-      #       | Latest deploy log | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
-      #       | Preview URL | ${{ steps.cloudflare-pages-deploy.outputs.url }} |
-      #       | Environment | ${{ steps.cloudflare-pages-deploy.outputs.environment }} |
-
   untrusted-preview:
     if: ${{ !(github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' || github.event.pull_request.author_association == 'OWNER') }}
     environment: Preview
@@ -145,16 +132,3 @@ jobs:
           deploymentName: Preview
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
           wranglerVersion: "3"
-
-      # - name: Create PR comment
-      #   if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
-      #   uses: mshick/add-pr-comment@v2
-      #   with:
-      #     message: |
-      #       ### ⚡ Successfully Cloudflare Pages deployed!
-      #       | Name | Link |
-      #       | :--- | :--- |
-      #       | Latest commit | ${{ github.event.pull_request.head.sha || github.sha }} |
-      #       | Latest deploy log | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
-      #       | Preview URL | ${{ steps.cloudflare-pages-deploy.outputs.url }} |
-      #       | Environment | ${{ steps.cloudflare-pages-deploy.outputs.environment }} |
