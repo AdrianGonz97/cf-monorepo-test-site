@@ -1,4 +1,4 @@
-name: Deploy Preview Site
+name: Preview Deployment
 on:
   pull_request_target:
     types:
@@ -23,15 +23,9 @@ permissions:
 
 jobs:
   publish:
+    environment: Preview
     runs-on: ubuntu-latest
     name: Publish Preview to Cloudflare Pages
-    if: ${{ (github.event.pull_request.author_association == 'MEMBER' ||
-      github.event.pull_request.author_association == 'COLLABORATOR' ||
-      github.event.pull_request.author_association == 'OWNER') ||
-      (github.event_name == 'pull_request_target' &&
-      github.event.action == 'labeled' &&
-      github.event.pull_request.head.repo.fork == true &&
-      contains(github.event.label.name, 'request-cf-deploy')) }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -79,7 +73,7 @@ jobs:
           # Optional: Change the working directory
           workingDirectory: sites/www
           # Optional: Change to customize the name of the GitHub Deployment
-          deploymentName: Preview!
+          deploymentName: Preview
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
           wranglerVersion: "3"
 
@@ -95,22 +89,3 @@ jobs:
             | Latest deploy log | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
             | Preview URL | ${{ steps.cloudflare-pages-deploy.outputs.url }} |
             | Environment | ${{ steps.cloudflare-pages-deploy.outputs.environment }} |
-
-  cleanup:
-    name: Remove label
-    if: always()
-    needs: [publish]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Remove label
-        if: ${{ github.event_name == 'pull_request_target' && contains(github.event.label.name, 'request-cf-deploy') }}
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.removeLabel({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: ['request-cf-deploy']
-            })
