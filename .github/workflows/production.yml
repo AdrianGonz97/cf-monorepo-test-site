@@ -45,15 +45,13 @@ jobs:
         run: pnpm -F www build
 
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
+        uses: AdrianGonz97/cf-pages-action@hb
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           projectName: cf-monorepo-test-site
           directory: ./.svelte-kit/cloudflare
-          # Optional: Enable this if you want to have GitHub Deployments triggered
+          deploymentName: Production
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          # Optional: Change the working directory
           workingDirectory: sites/www
-          # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
           wranglerVersion: "3"
