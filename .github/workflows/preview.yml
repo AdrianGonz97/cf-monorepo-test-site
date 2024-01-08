@@ -133,7 +133,7 @@ jobs:
 
       - name: Deploy to Cloudflare Pages
         id: cloudflare-pages-deploy
-        uses: AdrianGonz97/cf-pages-action@hb
+        uses: AdrianGonz97/cf-pages-action@chore/reorganize
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
