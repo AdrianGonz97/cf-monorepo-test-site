@@ -52,6 +52,6 @@ jobs:
           projectName: cf-monorepo-test-site
           directory: ./.svelte-kit/cloudflare
           deploymentName: Production
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
           workingDirectory: sites/www
           wranglerVersion: "3"

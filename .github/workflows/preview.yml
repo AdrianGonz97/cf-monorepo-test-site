@@ -84,7 +84,7 @@ jobs:
           projectName: cf-monorepo-test-site
           directory: ./.svelte-kit/cloudflare
           # Optional: Enable this if you want to have GitHub Deployments triggered
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
           # Optional: Change the working directory
           workingDirectory: sites/www
           # Optional: Change to customize the name of the GitHub Deployment
@@ -139,8 +139,8 @@ jobs:
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           projectName: cf-monorepo-test-site
           directory: ./.svelte-kit/cloudflare
-          # Optional: Enable this if you want to have GitHub Deployments triggered
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          # Required: Used for the deployment status as a PR comment
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
           # Optional: Change the working directory
           workingDirectory: sites/www
           # Optional: Change to customize the name of the GitHub Deployment
