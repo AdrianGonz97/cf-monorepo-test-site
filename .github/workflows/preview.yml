@@ -147,6 +147,3 @@ jobs:
           deploymentName: Preview
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
           wranglerVersion: "3"
-
-      - name: Soemthing
-        run: ppm ${{ steps.cloudflare-pages-deploy.outputs.alias }}
