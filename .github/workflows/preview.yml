@@ -77,7 +77,7 @@ jobs:
 
       - name: Deploy to Cloudflare Pages
         id: cloudflare-pages-deploy
-        uses: AdrianGonz97/refined-cf-pages-action@v1
+        uses: AdrianGonz97/refined-cf-pages-action@fix/error-log
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
