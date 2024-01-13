@@ -1,3 +1,18 @@
+#################### 🚧 WARNING: READ THIS BEFORE USING THIS FILE 🚧 ####################
+#
+#
+#
+# IF YOU DON'T KNOW WHAT YOU'RE DOING, YOU CAN EASILY LEAK SECRETS BY USING A
+# `pull_request_target` WORKFLOW INSTEAD OF `pull_request`! SERIOUSLY, DO NOT
+# BLINDLY COPY AND PASTE THIS FILE WITHOUT UNDERSTANDING THE FULL IMPLICATIONS
+# OF WHAT YOU'RE DOING! WE HAVE TESTED THIS FOR OUR OWN USE CASES, WHICH ARE
+# NOT NECESSARILY THE SAME AS YOURS! WHILE WE AREN'T EXPOSING ANY OF OUR SECRETS,
+# ONE COULD EASILY DO SO BY MODIFYING OR ADDING A STEP TO THIS WORKFLOW!
+#
+#
+#
+#################### 🚧 WARNING: READ THIS BEFORE USING THIS FILE 🚧 ####################
+
 name: Preview Deployment
 on:
   pull_request_target:
@@ -22,10 +37,10 @@ permissions:
   pull-requests: write
 
 jobs:
-  publish:
-    environment: Preview
+  trusted-preview-www:
+    if: ${{ github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' || github.event.pull_request.author_association == 'OWNER' }}
     runs-on: ubuntu-latest
-    name: Publish Preview to Cloudflare Pages
+    name: Deploy www Preview to Cloudflare Pages (admin)
     steps:
       - uses: actions/checkout@v3
         with:
@@ -62,14 +77,125 @@ jobs:
 
       - name: Deploy to Cloudflare Pages
         id: cloudflare-pages-deploy
-        uses: AdrianGonz97/cf-pages-action@hb
+        uses: AdrianGonz97/refined-cf-pages-action@feat/better-summary
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           projectName: cf-monorepo-test-site
           directory: ./.svelte-kit/cloudflare
           # Optional: Enable this if you want to have GitHub Deployments triggered
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          # Optional: Change the working directory
+          workingDirectory: sites/www
+          # Optional: Change to customize the name of the GitHub Deployment
+          deploymentName: www (Preview)
+          # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
+          wranglerVersion: "3"
+
+  trusted-preview-www2:
+    if: ${{ github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' || github.event.pull_request.author_association == 'OWNER' }}
+    runs-on: ubuntu-latest
+    name: Deploy www2 Preview to Cloudflare Pages (admin)
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          # ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          # fetch-depth: 0
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # PNPM Store cache setup
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: |
+          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      # Run a build step here if your project requires
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build site
+        run: pnpm -F www2 build
+
+      - name: Deploy to Cloudflare Pages
+        id: cloudflare-pages-deploy
+        uses: AdrianGonz97/refined-cf-pages-action@feat/better-summary
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          projectName: cf-monorepo-test-site2
+          directory: ./.svelte-kit/cloudflare
+          # Optional: Enable this if you want to have GitHub Deployments triggered
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          # Optional: Change the working directory
+          workingDirectory: sites/www2
+          # Optional: Change to customize the name of the GitHub Deployment
+          deploymentName: www2 (Preview)
+          # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
+          wranglerVersion: "3"
+
+  untrusted-preview:
+    if: ${{ !(github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' || github.event.pull_request.author_association == 'OWNER') }}
+    environment: Preview
+    runs-on: ubuntu-latest
+    name: Deploy Preview to Cloudflare Pages
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          # ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          # fetch-depth: 0
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # PNPM Store cache setup
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: |
+          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      # Run a build step here if your project requires
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build site
+        run: pnpm -F www build
+
+      - name: Deploy to Cloudflare Pages
+        id: cloudflare-pages-deploy
+        uses: AdrianGonz97/refined-cf-pages-action@feat/better-summary
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          projectName: cf-monorepo-test-site
+          directory: ./.svelte-kit/cloudflare
+          # Required: Used for the deployment status as a PR comment
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
           # Optional: Change the working directory
           workingDirectory: sites/www
           # Optional: Change to customize the name of the GitHub Deployment
@@ -77,15 +203,5 @@ jobs:
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
           wranglerVersion: "3"
 
-      - name: Create PR comment
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
-        uses: mshick/add-pr-comment@v2
-        with:
-          message: |
-            ### ⚡ Successfully Cloudflare Pages deployed!
-            | Name | Link |
-            | :--- | :--- |
-            | Latest commit | ${{ github.event.pull_request.head.sha || github.sha }} |
-            | Latest deploy log | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
-            | Preview URL | ${{ steps.cloudflare-pages-deploy.outputs.url }} |
-            | Environment | ${{ steps.cloudflare-pages-deploy.outputs.environment }} |
+      - name: Print
+        run: echo "alias - ${{steps.cloudflare-pages-deploy.outputs.alias}}"
