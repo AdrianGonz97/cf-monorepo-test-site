@@ -23,37 +23,31 @@ on:
     paths:
       - "sites/www/**"
 
-# cancel in-progress runs on new commits to same PR (github.event.number)
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.number || github.sha }}
-  cancel-in-progress: true
-
-permissions:
-  # default contents: read & write (in forked repos, only read)
-  contents: write
-  # default deployments: read & write (in forked repos, only read)
-  deployments: write
-  # default pull-requests: read & write (in forked repos, only read)
-  pull-requests: write
-
 jobs:
-  trusted-preview-www:
-    if: ${{ github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' || github.event.pull_request.author_association == 'OWNER' }}
+  deploy-preview:
     runs-on: ubuntu-latest
-    name: Deploy www Preview to Cloudflare Pages (admin)
+    permissions:
+      contents: read
+      pull-requests: read
+      deployments: write
+    name: Deploy www Preview to Cloudflare Pages
     steps:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
-          # ref: ${{ github.event.pull_request.head.sha || github.ref }}
-          # fetch-depth: 0
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8
-      - uses: actions/setup-node@v3
+
+      # Run a build step here
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
         with:
           node-version: 18
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        with:
+          version: 8
+          run_install: false
 
       # PNPM Store cache setup
       - name: Get pnpm store directory
@@ -68,28 +62,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      # Run a build step here if your project requires
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm i --frozen-lockfile
 
       - name: Build site
         run: pnpm -F www build
 
       - name: Deploy to Cloudflare Pages
-        id: cloudflare-pages-deploy
-        uses: AdrianGonz97/refined-cf-pages-action@feat/better-summary
+        uses: AdrianGonz97/refined-cf-pages-action@v1
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           projectName: cf-monorepo-test-site
           directory: ./.svelte-kit/cloudflare
-          # Optional: Enable this if you want to have GitHub Deployments triggered
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          # Optional: Change the working directory
           workingDirectory: sites/www
-          # Optional: Change to customize the name of the GitHub Deployment
           deploymentName: www (Preview)
-          # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
           wranglerVersion: "3"
 
   trusted-preview-www2:
@@ -132,7 +120,7 @@ jobs:
 
       - name: Deploy to Cloudflare Pages
         id: cloudflare-pages-deploy
-        uses: AdrianGonz97/refined-cf-pages-action@feat/better-summary
+        uses: AdrianGonz97/refined-cf-pages-action@v1
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
@@ -188,7 +176,7 @@ jobs:
 
       - name: Deploy to Cloudflare Pages
         id: cloudflare-pages-deploy
-        uses: AdrianGonz97/refined-cf-pages-action@feat/better-summary
+        uses: AdrianGonz97/refined-cf-pages-action@v1
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
