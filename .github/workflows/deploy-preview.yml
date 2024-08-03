@@ -32,7 +32,6 @@ jobs:
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           projectName: cf-monorepo-test-site
-          workingDirectory: sites/www
           directory: build
           deploymentName: Preview
           runId: ${{ github.event.workflow_run.id }}
