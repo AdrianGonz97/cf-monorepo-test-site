@@ -31,7 +31,7 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
-          projectName: gha-token-poc
+          projectName: cf-monorepo-test-site
           workingDirectory: sites/www
           directory: build
           deploymentName: Preview
