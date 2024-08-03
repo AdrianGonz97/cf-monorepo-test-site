@@ -27,7 +27,7 @@ jobs:
         run: pnpm install
 
       - name: Build site
-        run: pnpm build
+        run: pnpm -F www build
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
