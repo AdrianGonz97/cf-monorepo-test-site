@@ -1,55 +1,121 @@
-name: Deploy Preview Site
+#################### 🚧 WARNING: READ THIS BEFORE USING THIS FILE 🚧 ####################
+#
+#
+#
+# IF YOU DON'T KNOW WHAT YOU'RE DOING, YOU CAN EASILY LEAK SECRETS BY USING A
+# `pull_request_target` WORKFLOW INSTEAD OF `pull_request`! SERIOUSLY, DO NOT
+# BLINDLY COPY AND PASTE THIS FILE WITHOUT UNDERSTANDING THE FULL IMPLICATIONS
+# OF WHAT YOU'RE DOING! WE HAVE TESTED THIS FOR OUR OWN USE CASES, WHICH ARE
+# NOT NECESSARILY THE SAME AS YOURS! WHILE WE AREN'T EXPOSING ANY OF OUR SECRETS,
+# ONE COULD EASILY DO SO BY MODIFYING OR ADDING A STEP TO THIS WORKFLOW!
+#
+#
+#
+#################### 🚧 WARNING: READ THIS BEFORE USING THIS FILE 🚧 ####################
+
+name: Preview Deployment
 on:
   pull_request_target:
-    types:
-      - opened
-      - labeled
-      - synchronize
     paths:
       - "sites/www/**"
 
-# cancel in-progress runs on new commits to same PR (github.event.number)
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.number || github.sha }}
-  cancel-in-progress: true
-
-permissions:
-  # default contents: read & write (in forked repos, only read)
-  contents: write
-  # default deployments: read & write (in forked repos, only read)
-  deployments: write
-  # default pull-requests: read & write (in forked repos, only read)
-  pull-requests: write
-
 jobs:
-  publish:
+  deploy-preview:
     runs-on: ubuntu-latest
-    name: Publish Preview to Cloudflare Pages
-    if: ${{ github.event.pull_request.head.repo.fork == false || (github.event_name == 'pull_request_target' && github.event.action == 'labeled' && github.event.pull_request.head.repo.fork == true && contains(github.event.label.name, 'request-cf-deploy')) }}
+    permissions:
+      contents: read
+      pull-requests: write
+      deployments: write
+    name: Deploy www Preview to Cloudflare Pages
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.ref }}
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 8
-      - uses: actions/setup-node@v3
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+      # Run a build step here
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: pnpm
 
-      # PNPM Store cache setup
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        run: |
-          echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
         with:
-          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          version: 8
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm i --frozen-lockfile
+
+      - name: Build site
+        run: pnpm -F www build
+
+      - name: Deploy to Cloudflare Pages
+        uses: AdrianGonz97/refined-cf-pages-action@fix/workflow_run
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          projectName: cf-monorepo-test-site
+          directory: ./.svelte-kit/cloudflare
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          workingDirectory: sites/www
+          deploymentName: www (Preview)
+
+  trusted-preview-www2:
+    if: ${{ github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' || github.event.pull_request.author_association == 'OWNER' }}
+    runs-on: ubuntu-latest
+    name: Deploy www2 Preview to Cloudflare Pages (admin)
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: pnpm
+
+      # Run a build step here if your project requires
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build site
+        run: pnpm -F www2 build
+
+      - name: Deploy to Cloudflare Pages
+        id: cloudflare-pages-deploy
+        uses: AdrianGonz97/refined-cf-pages-action@fix/workflow_run
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          projectName: cf-monorepo-test-site2
+          directory: ./.svelte-kit/cloudflare
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          workingDirectory: sites/www2
+          deploymentName: www2 (Preview)
+
+  untrusted-preview:
+    if: ${{ !(github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR' || github.event.pull_request.author_association == 'OWNER') }}
+    environment: Preview
+    runs-on: ubuntu-latest
+    name: Deploy Preview to Cloudflare Pages
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: pnpm
 
       # Run a build step here if your project requires
       - name: Install dependencies
@@ -60,42 +126,15 @@ jobs:
 
       - name: Deploy to Cloudflare Pages
         id: cloudflare-pages-deploy
-        uses: jaoafa/cloudflare-pages-action@main
-        # uses: cloudflare/pages-action@v1
+        uses: AdrianGonz97/refined-cf-pages-action@fix/workflow_run
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
           projectName: cf-monorepo-test-site
           directory: ./.svelte-kit/cloudflare
-          # Optional: Enable this if you want to have GitHub Deployments triggered
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          # Optional: Change the working directory
           workingDirectory: sites/www
-          # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
-          # wranglerVersion: "3"
+          deploymentName: Preview
 
-      - name: Create PR comment
-        if: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' }}
-        uses: mshick/add-pr-comment@v2
-        with:
-          message: |
-            ### ⚡ Successfully Cloudflare Pages deployed!
-            | Name | Link |
-            | :--- | :--- |
-            | Latest commit | ${{ github.event.pull_request.head.sha || github.sha }} |
-            | Latest deploy log | ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} |
-            | Deploy Preview Url | [${{ steps.cloudflare-pages-deploy.outputs.url }}](${{ steps.cloudflare-pages-deploy.outputs.url }}) |
-            | Environment | ${{ steps.cloudflare-pages-deploy.outputs.environment }} |
-
-      - name: Remove label
-        if: ${{ github.event_name == 'pull_request_target' && contains(github.event.label.name, 'request-cf-deploy') }}
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.removeLabel({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: ['request-cf-deploy']
-            })
+      - name: Print
+        run: echo "alias - ${{steps.cloudflare-pages-deploy.outputs.alias}}"
